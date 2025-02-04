@@ -17,7 +17,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class JacobFSTest extends AbstractJacobFSTest {
 
-    private static Map<String, byte[]> getProjectFiles() throws IOException {
+    @Test
+    void shouldCreateACopy() throws IOException {
+        Map<String, byte[]> projectFiles = getProjectFiles();
+        for (Map.Entry<String, byte[]> entry : projectFiles.entrySet()) {
+            jacobFS.executeCommand(new WriteFile(entry.getKey(), entry.getValue()));
+        }
+        Map<String, byte[]> containerFiles = jacobFS.executeCommand(new FetchAllFiles());
+        assertEquals(projectFiles.size(), containerFiles.size());
+        assertTrue(projectFiles.entrySet().stream()
+                .allMatch(entry -> Arrays.equals(entry.getValue(), containerFiles.get(entry.getKey()))));
+    }
+
+    private Map<String, byte[]> getProjectFiles() throws IOException {
         try (Stream<Path> walk = Files.walk(Path.of("."))) {
             return walk.map(Path::normalize)
                     .filter(path -> !path.startsWith("target"))
@@ -38,15 +50,4 @@ class JacobFSTest extends AbstractJacobFSTest {
         return "/" + path.toString().replaceAll("\\\\", "/");
     }
 
-    @Test
-    void shouldCreateACopy() throws IOException {
-        Map<String, byte[]> projectFiles = getProjectFiles();
-        for (Map.Entry<String, byte[]> entry : projectFiles.entrySet()) {
-            jacobFS.executeCommand(new WriteFile(entry.getKey(), entry.getValue()));
-        }
-        Map<String, byte[]> containerFiles = jacobFS.executeCommand(new FetchAllFiles());
-        assertEquals(projectFiles.size(), containerFiles.size());
-        assertTrue(projectFiles.entrySet().stream()
-                .allMatch(entry -> Arrays.equals(entry.getValue(), containerFiles.get(entry.getKey()))));
-    }
 }
