@@ -10,7 +10,10 @@ class PathValidatorTest {
     @ValueSource(strings = {
             "",
             "/",
+            "//",
             "d",
+            "f",
+            "\\\\",
             "/./no",
             "/some/../file.txt"
     })

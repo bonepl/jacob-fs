@@ -12,27 +12,33 @@ public class TreeLocator {
 
     private RootNode rootNode;
     private TreeLocatorMetadata treeLocatorMetadata;
-    private final TreeLocatorDecoder treeLocatorDecoder = new TreeLocatorDecoder();
-    private final TreeLocatorEncoder treeLocatorEncoder = new TreeLocatorEncoder();
+    private final TreeLocatorDecoder treeLocatorDecoder;
+    private final TreeLocatorEncoder treeLocatorEncoder;
 
-    private TreeLocator() {
+    public TreeLocator(Path path) throws IOException {
+        this(path, new TreeLocatorEncoder(), new TreeLocatorDecoder());
     }
 
-    public static TreeLocator init(Path path) throws IOException {
-        TreeLocator treeLocator = new TreeLocator();
-        treeLocator.treeLocatorMetadata = TreeLocatorMetadata.init(path);
-        treeLocator.rootNode = new RootNode();
-        treeLocator.rootNode.setPayloadSpaceEndOffset(treeLocator.treeLocatorMetadata.getPayloadSpaceOffset());
-        treeLocator.saveState();
-        return treeLocator;
+    public TreeLocator(Path path, TreeLocatorEncoder treeLocatorEncoder, TreeLocatorDecoder treeLocatorDecoder) throws IOException {
+        this.treeLocatorEncoder = treeLocatorEncoder;
+        this.treeLocatorDecoder = treeLocatorDecoder;
+        if (path.toFile().exists()) {
+            loadContainer(path);
+        } else {
+            createNewContainer(path);
+        }
     }
 
-    public static TreeLocator load(Path path) throws IOException {
-        TreeLocator treeLocator = new TreeLocator();
-        treeLocator.treeLocatorMetadata = TreeLocatorMetadata.load(path);
-        treeLocator.rootNode = treeLocator.getTreeLocatorDecoder()
-                .loadTreeLocatorFromFile(treeLocator.treeLocatorMetadata);
-        return treeLocator;
+    private void createNewContainer(Path path) throws IOException {
+        treeLocatorMetadata = TreeLocatorMetadata.init(path);
+        rootNode = new RootNode();
+        rootNode.setPayloadSpaceEndOffset(treeLocatorMetadata.getPayloadSpaceOffset());
+        saveState();
+    }
+
+    public void loadContainer(Path path) throws IOException {
+        treeLocatorMetadata = TreeLocatorMetadata.load(path);
+        rootNode = treeLocatorDecoder.loadTreeLocatorFromFile(treeLocatorMetadata);
     }
 
     /**
@@ -102,18 +108,10 @@ public class TreeLocator {
     }
 
     public void saveState() throws IOException {
-        getTreeLocatorEncoder().saveTreeLocatorToFile(rootNode, treeLocatorMetadata);
+        treeLocatorEncoder.saveTreeLocatorToFile(rootNode, treeLocatorMetadata);
     }
 
     public File getFile() {
         return treeLocatorMetadata.getFile();
-    }
-
-    public TreeLocatorDecoder getTreeLocatorDecoder() {
-        return treeLocatorDecoder;
-    }
-
-    public TreeLocatorEncoder getTreeLocatorEncoder() {
-        return treeLocatorEncoder;
     }
 }

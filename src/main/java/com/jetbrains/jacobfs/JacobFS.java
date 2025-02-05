@@ -21,12 +21,8 @@ public class JacobFS {
         command.execute(treeLocator);
     }
 
-    public void createContainer(String path) throws IOException {
-        treeLocator = TreeLocator.init(Path.of(path));
-    }
-
     public void openContainer(String path) throws IOException {
-        treeLocator = TreeLocator.load(Path.of(path));
+        treeLocator = new TreeLocator(Path.of(path));
     }
 
     public void closeContainer() {

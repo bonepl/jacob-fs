@@ -1,21 +1,17 @@
 package com.jetbrains.jacobfs.functionaltests;
 
-import com.jetbrains.jacobfs.AbstractJacobFSTest;
 import com.jetbrains.jacobfs.command.FetchAllFiles;
 import com.jetbrains.jacobfs.command.WriteFile;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class ImportExportProjectFunctionalTest extends AbstractJacobFSTest {
+class ImportExportProjectFunctionalTest extends AbstractFunctionalTest {
 
     @Test
     void shouldImportExportProjectFiles() throws IOException {
@@ -28,26 +24,4 @@ class ImportExportProjectFunctionalTest extends AbstractJacobFSTest {
         assertTrue(projectFiles.entrySet().stream()
                 .allMatch(entry -> Arrays.equals(entry.getValue(), containerFiles.get(entry.getKey()))));
     }
-
-    private Map<String, byte[]> getProjectFiles() throws IOException {
-        try (Stream<Path> walk = Files.walk(Path.of("."))) {
-            return walk.map(Path::normalize)
-                    .filter(path -> !path.startsWith("target"))
-                    .filter(path -> path.toFile().isFile())
-                    .collect(Collectors.toMap(ImportExportProjectFunctionalTest::convertWindowsPath, ImportExportProjectFunctionalTest::readAllBytesSilently));
-        }
-    }
-
-    private static byte[] readAllBytesSilently(Path path) {
-        try {
-            return Files.readAllBytes(path);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static String convertWindowsPath(Path path) {
-        return "/" + path.toString().replaceAll("\\\\", "/");
-    }
-
 }

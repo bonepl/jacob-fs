@@ -24,7 +24,7 @@ public abstract class AbstractJacobFSTest {
     @BeforeEach
     protected void setUp() throws IOException {
         jacobFS.deleteContainer(TEST_CNT_PATH);
-        jacobFS.createContainer(TEST_CNT_PATH);
+        jacobFS.openContainer(TEST_CNT_PATH);
     }
 
     protected void reopenTestContainer() throws IOException {
