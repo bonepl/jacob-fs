@@ -6,7 +6,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class TreeLocatorDecoderTest {
-    TreeLocatorDecoder treeLocatorDecoder = new TreeLocatorDecoder();
+    final TreeLocatorDecoder treeLocatorDecoder = new TreeLocatorDecoder();
 
     @ParameterizedTest
     @ValueSource(strings = {

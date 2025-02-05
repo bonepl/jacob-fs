@@ -1,5 +1,7 @@
 package com.jetbrains.jacobfs.tree;
 
+import java.util.Objects;
+
 public class FileNode {
     private final long offset;
     private final int length;
@@ -29,5 +31,15 @@ public class FileNode {
 
     public long getEndOffset() {
         return offset + length;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+
+        FileNode fileNode = (FileNode) o;
+        return offset == fileNode.offset
+                && length == fileNode.length
+                && Objects.equals(fileName, fileNode.fileName);
     }
 }

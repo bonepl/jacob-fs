@@ -4,8 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.file.FileAlreadyExistsException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class TreeLocatorEncoderTest {
@@ -20,6 +19,18 @@ class TreeLocatorEncoderTest {
         doReturn(new String(new byte[reservedSpace + 1])).when(treeLocatorEncoder).encode(any());
         assertThrows(RuntimeException.class,
                 () -> treeLocatorEncoder.saveTreeLocatorToFile(new RootNode(), mockedTLM));
+    }
+
+    @Test
+    void shouldEncodeDecodeEmpty() throws FileAlreadyExistsException {
+        TreeLocatorEncoder treeLocatorEncoder = new TreeLocatorEncoder();
+        TreeLocatorDecoder treeLocatorDecoder = new TreeLocatorDecoder();
+
+        String encoded1 = treeLocatorEncoder.encode(new RootNode());
+        RootNode decoded = treeLocatorDecoder.decode(encoded1);
+        String encoded2 = treeLocatorEncoder.encode(decoded);
+        assertEquals(encoded1, encoded2);
+        assertTrue(encoded1.isEmpty());
     }
 
     @Test

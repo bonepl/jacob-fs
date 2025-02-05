@@ -11,7 +11,7 @@ import java.util.Optional;
 public class TreeLocator {
 
     private RootNode rootNode;
-    private TreeLocatorMetadata treeLocatorMetadata;
+    private final TreeLocatorMetadata treeLocatorMetadata;
     private final TreeLocatorDecoder treeLocatorDecoder;
     private final TreeLocatorEncoder treeLocatorEncoder;
 
@@ -20,24 +20,23 @@ public class TreeLocator {
     }
 
     public TreeLocator(Path path, TreeLocatorEncoder treeLocatorEncoder, TreeLocatorDecoder treeLocatorDecoder) throws IOException {
+        this.treeLocatorMetadata = new TreeLocatorMetadata(path);
         this.treeLocatorEncoder = treeLocatorEncoder;
         this.treeLocatorDecoder = treeLocatorDecoder;
-        if (path.toFile().exists()) {
-            loadContainer(path);
+        if (treeLocatorMetadata.getTreeLocatorLength() == 0) {
+            initializeContainer();
         } else {
-            createNewContainer(path);
+            loadContainer();
         }
     }
 
-    private void createNewContainer(Path path) throws IOException {
-        treeLocatorMetadata = TreeLocatorMetadata.init(path);
+    private void initializeContainer() throws IOException {
         rootNode = new RootNode();
         rootNode.setPayloadSpaceEndOffset(treeLocatorMetadata.getPayloadSpaceOffset());
         saveState();
     }
 
-    public void loadContainer(Path path) throws IOException {
-        treeLocatorMetadata = TreeLocatorMetadata.load(path);
+    private void loadContainer() throws IOException {
         rootNode = treeLocatorDecoder.loadTreeLocatorFromFile(treeLocatorMetadata);
     }
 
@@ -91,6 +90,8 @@ public class TreeLocator {
             DirNode dirNode = dirNodes.get(i);
             if (dirNode.getFileNodes() == null && dirNode.getDirNodes() == null) {
                 dirNodes.get(i - 1).removeDirNodeByName(dirNode.getName());
+            } else {
+                return;
             }
         }
     }
