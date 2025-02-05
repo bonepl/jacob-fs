@@ -5,27 +5,14 @@ import java.nio.file.NoSuchFileException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class DirNode {
-    public static final String TAG = "d";
-    public static final Pattern DIR_NODE_PATTERN
-            = Pattern.compile(TAG + "([^\\n]+)\\n?");
     private String name;
     private List<DirNode> dirNodes;
     private List<FileNode> fileNodes;
 
     public DirNode(String name) {
         this.name = name;
-    }
-
-    public static DirNode fromString(String encoded) {
-        Matcher matcher = DIR_NODE_PATTERN.matcher(encoded);
-        if (matcher.find()) {
-            return new DirNode(matcher.group(1));
-        }
-        throw new RuntimeException(String.format("Improper DirNode string format: %s", encoded));
     }
 
     public String getName() {
@@ -41,7 +28,7 @@ public class DirNode {
             dirNodes = new LinkedList<>();
         }
 
-        Optional<DirNode> existingDirNode = getDirNode(dirNode.getName());
+        Optional<DirNode> existingDirNode = getDirNodeByName(dirNode.getName());
         if (existingDirNode.isPresent()) {
             return existingDirNode.get();
         }
@@ -50,18 +37,18 @@ public class DirNode {
         return dirNode;
     }
 
-    public Optional<DirNode> getDirNode(String dirName) {
+    public Optional<DirNode> getDirNodeByName(String name) {
         if (dirNodes == null) {
             return Optional.empty();
         }
         return dirNodes.stream()
-                .filter(pn -> pn.getName().equals(dirName))
+                .filter(pn -> pn.getName().equals(name))
                 .findAny();
     }
 
-    public void removeDirNode(String dirName) throws NoSuchFileException {
-        DirNode dirNode = getDirNode(dirName)
-                .orElseThrow(() -> new NoSuchFileException(dirName));
+    public void removeDirNodeByName(String name) throws NoSuchFileException {
+        DirNode dirNode = getDirNodeByName(name)
+                .orElseThrow(() -> new NoSuchFileException(name));
         dirNodes.remove(dirNode);
         if (dirNodes.isEmpty()) {
             dirNodes = null;
@@ -73,7 +60,7 @@ public class DirNode {
             fileNodes = new LinkedList<>();
         }
 
-        Optional<FileNode> existingFileNode = getFileNode(fileNode.getFileName());
+        Optional<FileNode> existingFileNode = getFileNodeByName(fileNode.getFileName());
         if (existingFileNode.isPresent()) {
             throw new FileAlreadyExistsException(
                     String.format("File %s already exists at this location", fileNode.getFileName()));
@@ -82,18 +69,18 @@ public class DirNode {
         fileNodes.add(fileNode);
     }
 
-    public Optional<FileNode> getFileNode(String fileName) {
+    public Optional<FileNode> getFileNodeByName(String name) {
         if (fileNodes == null) {
             return Optional.empty();
         }
         return fileNodes.stream()
-                .filter(fn -> fn.getFileName().equals(fileName))
+                .filter(fn -> fn.getFileName().equals(name))
                 .findAny();
     }
 
-    public void removeFileNode(String fileName) throws NoSuchFileException {
-        FileNode fileNode = getFileNode(fileName)
-                .orElseThrow(() -> new NoSuchFileException(fileName));
+    public void removeFileNodeByName(String name) throws NoSuchFileException {
+        FileNode fileNode = getFileNodeByName(name)
+                .orElseThrow(() -> new NoSuchFileException(name));
         fileNodes.remove(fileNode);
         if (fileNodes.isEmpty()) {
             fileNodes = null;
@@ -106,10 +93,5 @@ public class DirNode {
 
     public List<FileNode> getFileNodes() {
         return fileNodes;
-    }
-
-    @Override
-    public String toString() {
-        return TAG + name;
     }
 }

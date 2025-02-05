@@ -6,7 +6,7 @@ import java.util.Objects;
 
 public class PathValidator {
     public static void validatePath(Path path) {
-        validateStartsWithRoot(path);
+        validatePathRequireRoot(path);
         validateIsNotRoot(path);
         validatePathNormalized(path);
     }
@@ -15,10 +15,11 @@ public class PathValidator {
         validatePath(Path.of(path));
     }
 
-    private static void validateStartsWithRoot(Path path) {
-        if (!Objects.equals(File.separator, path.getRoot().toString())) {
+    private static void validatePathRequireRoot(Path path) {
+        if (Objects.isNull(path.getRoot())
+                || !Objects.equals(File.separator, path.getRoot().toString())) {
             throw new IllegalArgumentException(
-                    String.format("%s - path argument needs to start with %s", path, RootNode.ROOT));
+                    String.format("%s - path requires starting from /", path));
         }
     }
 

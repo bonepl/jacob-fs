@@ -21,10 +21,10 @@ public class DeleteFile implements VoidCommand {
         PathValidator.validatePath(path);
         DirNode dirNode = treeLocator.getDirNode(path)
                 .orElseThrow(() -> new NoSuchFileException(path.toString()));
-        FileNode fileNode = dirNode.getFileNode(path.getFileName().toString())
+        FileNode fileNode = dirNode.getFileNodeByName(path.getFileName().toString())
                 .orElseThrow(() -> new NoSuchFileException(path.toString()));
-        dirNode.removeFileNode(fileNode.getFileName());
-        treeLocator.removeEmptyDirNodes(path);
+        dirNode.removeFileNodeByName(fileNode.getFileName());
+        treeLocator.removeEmptyDirNodesFromPath(path);
         treeLocator.saveState();
     }
 }

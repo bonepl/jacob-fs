@@ -27,7 +27,7 @@ public class WriteFile implements VoidCommand {
                 rootNode.getPayloadSpaceEndOffset(), contents.length);
         rootNode.setPayloadSpaceEndOffset(fileNode.getEndOffset());
 
-        DirNode dirNode = treeLocator.addDirNodes(path);
+        DirNode dirNode = treeLocator.makeDirNodesPath(path);
         dirNode.addFileNode(fileNode);
 
         try (RandomAccessFile randomAccessFile = new RandomAccessFile(treeLocator.getFile(), "rw")) {

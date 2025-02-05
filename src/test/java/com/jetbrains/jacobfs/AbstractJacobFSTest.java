@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 public abstract class AbstractJacobFSTest {
-    public final static String TEST_CNT_PATH = "./test-jacobfs.cnt";
+    public final static String TEST_CNT_PATH = "./test-container.jfs";
     public final JacobFS jacobFS = new JacobFS();
 
     public static Command<FileNode> getFileNodeCommand(String sourceFilePath) {
@@ -32,7 +32,8 @@ public abstract class AbstractJacobFSTest {
     }
 
     @AfterEach
-    protected void tearDown() {
+    protected void tearDown() throws IOException {
         jacobFS.closeContainer();
+        jacobFS.deleteContainer(TEST_CNT_PATH);
     }
 }

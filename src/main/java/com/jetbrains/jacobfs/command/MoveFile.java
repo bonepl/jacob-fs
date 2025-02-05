@@ -30,22 +30,22 @@ public class MoveFile implements VoidCommand {
         PathValidator.validatePath(destination);
         DirNode sourceDirNode = treeLocator.getDirNode(source)
                 .orElseThrow(() -> new NoSuchFileException(String.format("File %s does not exist", source)));
-        FileNode fileNode = sourceDirNode.getFileNode(source.getFileName().toString())
+        FileNode fileNode = sourceDirNode.getFileNodeByName(source.getFileName().toString())
                 .orElseThrow(() -> new NoSuchFileException(String.format("File %s does not exist", source)));
-        DirNode destinationDirNode = treeLocator.addDirNodes(destination);
+        DirNode destinationDirNode = treeLocator.makeDirNodesPath(destination);
 
         String newFileName = destination.getFileName().toString();
-        Optional<FileNode> destinationFile = destinationDirNode.getFileNode(newFileName);
+        Optional<FileNode> destinationFile = destinationDirNode.getFileNodeByName(newFileName);
         if (destinationFile.isPresent()) {
             throw new FileAlreadyExistsException(destination.toString());
         }
 
-        sourceDirNode.removeFileNode(fileNode.getFileName());
+        sourceDirNode.removeFileNodeByName(fileNode.getFileName());
 
         fileNode.setFileName(newFileName);
         destinationDirNode.addFileNode(fileNode);
 
-        treeLocator.removeEmptyDirNodes(source);
+        treeLocator.removeEmptyDirNodesFromPath(source);
         treeLocator.saveState();
     }
 }

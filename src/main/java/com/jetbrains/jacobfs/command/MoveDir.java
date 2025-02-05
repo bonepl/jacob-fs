@@ -29,22 +29,22 @@ public class MoveDir implements VoidCommand {
         PathValidator.validatePath(destination);
         DirNode sourceParentDirNode = treeLocator.getDirNode(source)
                 .orElseThrow(() -> new NoSuchFileException(String.format("Directory %s does not exist", source)));
-        DirNode movedDirNode = sourceParentDirNode.getDirNode(source.getFileName().toString())
+        DirNode movedDirNode = sourceParentDirNode.getDirNodeByName(source.getFileName().toString())
                 .orElseThrow(() -> new NoSuchFileException(String.format("Directory %s does not exist", source)));
-        DirNode destinationDirNode = treeLocator.addDirNodes(destination);
+        DirNode destinationDirNode = treeLocator.makeDirNodesPath(destination);
 
         String newDirName = destination.getFileName().toString();
-        Optional<DirNode> existingDestinationDirNode = destinationDirNode.getDirNode(newDirName);
+        Optional<DirNode> existingDestinationDirNode = destinationDirNode.getDirNodeByName(newDirName);
         if (existingDestinationDirNode.isPresent()) {
             throw new FileAlreadyExistsException(destination.toString());
         }
 
-        sourceParentDirNode.removeDirNode(movedDirNode.getName());
+        sourceParentDirNode.removeDirNodeByName(movedDirNode.getName());
 
         movedDirNode.setName(newDirName);
         destinationDirNode.addDirNode(movedDirNode);
 
-        treeLocator.removeEmptyDirNodes(source);
+        treeLocator.removeEmptyDirNodesFromPath(source);
         treeLocator.saveState();
     }
 }
