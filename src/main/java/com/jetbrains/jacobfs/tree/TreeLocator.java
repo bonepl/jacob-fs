@@ -17,7 +17,6 @@ public class TreeLocator {
 
     private TreeLocator() {
     }
-    //TODO test for too big locator
 
     public static TreeLocator init(Path path) throws IOException {
         TreeLocator treeLocator = new TreeLocator();

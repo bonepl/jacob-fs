@@ -11,16 +11,19 @@ public final class TreeLocatorEncoder {
     public static final String END_LINE_TAG = "\n";
 
     public void saveTreeLocatorToFile(RootNode rootNode, TreeLocatorMetadata treeLocatorMetadata) throws IOException {
-        String string = encode(rootNode);
+        String encoded = encode(rootNode);
+        if (encoded.length() > treeLocatorMetadata.getTreeLocatorReservedSpace()) {
+            throw new RuntimeException("TreeLocator is too big to be saved! Last command has not been persisted");
+        }
         try (RandomAccessFile randomAccessFile = new RandomAccessFile(treeLocatorMetadata.getFile(), "rw")) {
             randomAccessFile.seek(treeLocatorMetadata.getTreeLocatorOffset());
-            randomAccessFile.writeBytes(string);
+            randomAccessFile.writeBytes(encoded);
         }
-        treeLocatorMetadata.setTreeLocatorLength(string.length());
+        treeLocatorMetadata.setTreeLocatorLength(encoded.length());
         treeLocatorMetadata.saveState();
     }
 
-    public String encode(DirNode rootNode) {
+    public String encode(RootNode rootNode) {
         StringBuilder sb = new StringBuilder();
         appendToStringBuilder(rootNode, sb);
         return sb.toString();
