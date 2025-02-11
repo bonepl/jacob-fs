@@ -1,6 +1,7 @@
 package com.jetbrains.jacobfs.command;
 
 import com.jetbrains.jacobfs.tree.DirNode;
+import com.jetbrains.jacobfs.tree.FileNode;
 import com.jetbrains.jacobfs.tree.PathValidator;
 import com.jetbrains.jacobfs.tree.TreeLocator;
 
@@ -8,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.Optional;
 
 public class MoveDir implements VoidCommand {
@@ -45,6 +47,20 @@ public class MoveDir implements VoidCommand {
         destinationDirNode.addDirNode(movedDirNode);
 
         treeLocator.removeEmptyDirNodesFromPath(source);
-        treeLocator.saveState();
+        updateFilesRecursively(destination, movedDirNode, treeLocator);
+    }
+
+    public void updateFilesRecursively(Path destinationPath, DirNode dirNode, TreeLocator treeLocator) throws IOException {
+        if (Objects.nonNull(dirNode.getFileNodes())) {
+            for (FileNode fn : dirNode.getFileNodes()) {
+                treeLocator.saveFileNodeToFile(destinationPath.resolve(fn.getFileName()), fn);
+            }
+        }
+        if (Objects.nonNull(dirNode.getDirNodes())) {
+            for (DirNode dn : dirNode.getDirNodes()) {
+                Path newPath = destinationPath.resolve(dn.getName());
+                updateFilesRecursively(newPath, dn, treeLocator);
+            }
+        }
     }
 }

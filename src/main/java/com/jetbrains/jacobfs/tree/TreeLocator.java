@@ -12,17 +12,11 @@ public class TreeLocator {
 
     private RootNode rootNode;
     private final TreeLocatorMetadata treeLocatorMetadata;
-    private final TreeLocatorDecoder treeLocatorDecoder;
-    private final TreeLocatorEncoder treeLocatorEncoder;
+    private final TreeLocatorFileBlockEncoder treeLocatorEncoder = new TreeLocatorFileBlockEncoder();
+    private final TreeLocatorFileBlockDecoder treeLocatorDecoder = new TreeLocatorFileBlockDecoder();
 
     public TreeLocator(Path path) throws IOException {
-        this(path, new TreeLocatorEncoder(), new TreeLocatorDecoder());
-    }
-
-    public TreeLocator(Path path, TreeLocatorEncoder treeLocatorEncoder, TreeLocatorDecoder treeLocatorDecoder) throws IOException {
         this.treeLocatorMetadata = new TreeLocatorMetadata(path);
-        this.treeLocatorEncoder = treeLocatorEncoder;
-        this.treeLocatorDecoder = treeLocatorDecoder;
         if (treeLocatorMetadata.getTreeLocatorLength() == 0) {
             initializeContainer();
         } else {
@@ -30,10 +24,9 @@ public class TreeLocator {
         }
     }
 
-    private void initializeContainer() throws IOException {
+    private void initializeContainer() {
         rootNode = new RootNode();
         rootNode.setPayloadSpaceEndOffset(treeLocatorMetadata.getPayloadSpaceOffset());
-        saveState();
     }
 
     private void loadContainer() throws IOException {
@@ -44,14 +37,7 @@ public class TreeLocator {
      * add all dirs on path, return top dir, new or existing
      */
     public DirNode makeDirNodesPath(Path filePath) {
-        DirNode currentNode = rootNode;
-        if (filePath.getParent() != null) {
-            for (Path path : filePath.getParent()) {
-                currentNode = currentNode.addDirNode(new DirNode(path.toString()));
-            }
-        }
-
-        return currentNode;
+        return rootNode.makeDirNodesPath(filePath);
     }
 
     /**
@@ -108,8 +94,12 @@ public class TreeLocator {
         return rootNode;
     }
 
-    public void saveState() throws IOException {
-        treeLocatorEncoder.saveTreeLocatorToFile(rootNode, treeLocatorMetadata);
+    public void saveFileNodeToFile(Path path, FileNode fileNode) throws IOException {
+        treeLocatorEncoder.saveFileNodeToFile(path, fileNode, treeLocatorMetadata);
+    }
+
+    public void removeFileNodeFromFile(FileNode fileNode) throws IOException {
+        treeLocatorEncoder.removeFileNodeFromFile(fileNode, treeLocatorMetadata);
     }
 
     public File getFile() {

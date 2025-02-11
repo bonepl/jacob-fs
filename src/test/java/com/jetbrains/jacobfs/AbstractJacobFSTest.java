@@ -10,7 +10,7 @@ import java.nio.file.Path;
 
 public abstract class AbstractJacobFSTest {
     public final static String TEST_CNT_PATH = "./test-container.jfs";
-    public final JacobFS jacobFS = new JacobFS();
+    public static final JacobFS jacobFS = new JacobFS();
 
     public static Command<FileNode> getFileNodeCommand(String sourceFilePath) {
         return treeLocator -> treeLocator.getFileNode(Path.of(sourceFilePath))
@@ -24,10 +24,10 @@ public abstract class AbstractJacobFSTest {
     @BeforeEach
     protected void setUp() throws IOException {
         jacobFS.deleteContainer(TEST_CNT_PATH);
-        jacobFS.openContainer(TEST_CNT_PATH);
+        reopenTestContainer();
     }
 
-    protected void reopenTestContainer() throws IOException {
+    public void reopenTestContainer() throws IOException {
         jacobFS.openContainer(TEST_CNT_PATH);
     }
 

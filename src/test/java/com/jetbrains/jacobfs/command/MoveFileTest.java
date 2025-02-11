@@ -85,15 +85,15 @@ class MoveFileTest extends AbstractJacobFSTest {
         Long oldPayloadEndOffset = jacobFS.executeCommand(getPayloadSpaceEndOffsetCommand());
         FileNode sourceFileNode = jacobFS.executeCommand(getFileNodeCommand(sourceFilePath));
         assertEquals("rootkit.dll", sourceFileNode.getFileName());
-        long sourceOffset = sourceFileNode.getOffset();
-        int sourceLength = sourceFileNode.getLength();
+        long sourceOffset = sourceFileNode.getPayloadOffset();
+        int sourceLength = sourceFileNode.getPayloadLength();
 
         jacobFS.executeCommand(new MoveFile(sourceFilePath, destinationFilePath));
         FileNode destinationFileNode = jacobFS.executeCommand(getFileNodeCommand(destinationFilePath));
 
         assertEquals("kernel.dll", destinationFileNode.getFileName());
-        assertEquals(sourceOffset, destinationFileNode.getOffset());
-        assertEquals(sourceLength, destinationFileNode.getLength());
+        assertEquals(sourceOffset, destinationFileNode.getPayloadOffset());
+        assertEquals(sourceLength, destinationFileNode.getPayloadLength());
         assertEquals(oldPayloadEndOffset, jacobFS.executeCommand(getPayloadSpaceEndOffsetCommand()));
     }
 }

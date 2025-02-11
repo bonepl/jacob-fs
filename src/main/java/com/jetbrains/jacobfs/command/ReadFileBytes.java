@@ -21,9 +21,9 @@ public class ReadFileBytes implements Command<byte[]> {
         PathValidator.validatePath(path);
         FileNode fileNode = treeLocator.getFileNode(path)
                 .orElseThrow(() -> new NoSuchFileException(path.toString()));
-        byte[] bytes = new byte[fileNode.getLength()];
+        byte[] bytes = new byte[fileNode.getPayloadLength()];
         try (RandomAccessFile randomAccessFile = new RandomAccessFile(treeLocator.getFile(), "r")) {
-            randomAccessFile.seek(fileNode.getOffset());
+            randomAccessFile.seek(fileNode.getPayloadOffset());
             randomAccessFile.read(bytes);
         }
         return bytes;

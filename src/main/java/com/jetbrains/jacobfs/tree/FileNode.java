@@ -1,16 +1,31 @@
 package com.jetbrains.jacobfs.tree;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class FileNode {
-    private final long offset;
-    private final int length;
+public class FileNode implements Serializable {
+    private long headerOffset;
+    private final long payloadOffset;
+    private final int payloadLength;
     private String fileName;
 
-    public FileNode(String fileName, long offset, int length) {
+    public FileNode(long headerOffset, String fileName, long payloadOffset, int payloadLength) {
+        this.headerOffset = headerOffset;
         this.fileName = fileName;
-        this.offset = offset;
-        this.length = length;
+        this.payloadOffset = payloadOffset;
+        this.payloadLength = payloadLength;
+    }
+
+    public FileNode(String fileName, long payloadOffset, int payloadLength) {
+        this(0, fileName, payloadOffset, payloadLength);
+    }
+
+    public long getHeaderOffset() {
+        return headerOffset;
+    }
+
+    public void setHeaderOffset(long headerOffset) {
+        this.headerOffset = headerOffset;
     }
 
     public String getFileName() {
@@ -21,16 +36,16 @@ public class FileNode {
         this.fileName = fileName;
     }
 
-    public long getOffset() {
-        return offset;
+    public long getPayloadOffset() {
+        return payloadOffset;
     }
 
-    public int getLength() {
-        return length;
+    public int getPayloadLength() {
+        return payloadLength;
     }
 
     public long getEndOffset() {
-        return offset + length;
+        return payloadOffset + payloadLength;
     }
 
     @Override
@@ -38,8 +53,8 @@ public class FileNode {
         if (o == null || getClass() != o.getClass()) return false;
 
         FileNode fileNode = (FileNode) o;
-        return offset == fileNode.offset
-                && length == fileNode.length
+        return payloadOffset == fileNode.payloadOffset
+                && payloadLength == fileNode.payloadLength
                 && Objects.equals(fileName, fileNode.fileName);
     }
 }

@@ -82,6 +82,40 @@ class MoveDirTest extends AbstractJacobFSTest {
     }
 
     @Test
+    void shouldMoveMultipleFilesToDifferentFolder() throws IOException {
+        String sourceFilePath = "/rootkit/files/";
+        String destinationFilePath = "/windows/system32/";
+
+        jacobFS.executeCommand(new WriteFile(sourceFilePath + "libs/lib1.dll", "lib1"));
+        jacobFS.executeCommand(new WriteFile(sourceFilePath + "libs/lib2.dll", "lib2"));
+        jacobFS.executeCommand(new WriteFile(sourceFilePath + "kernel/bin/kernel.dll", "kernel"));
+
+        jacobFS.executeCommand(new MoveDir(sourceFilePath, destinationFilePath));
+        assertEquals("lib1", jacobFS.executeCommand(new ReadFileString(destinationFilePath + "libs/lib1.dll")));
+        assertEquals("lib2", jacobFS.executeCommand(new ReadFileString(destinationFilePath + "libs/lib2.dll")));
+        assertEquals("kernel", jacobFS.executeCommand(new ReadFileString(destinationFilePath + "kernel/bin/kernel.dll")));
+        assertThrows(NoSuchFileException.class,
+                () -> jacobFS.executeCommand(new ReadFileString(sourceFilePath + "libs/lib1.dll")));
+        assertThrows(NoSuchFileException.class,
+                () -> jacobFS.executeCommand(new ReadFileString(sourceFilePath + "libs/lib2.dll")));
+        assertThrows(NoSuchFileException.class,
+                () -> jacobFS.executeCommand(new ReadFileString(sourceFilePath + "kernel/bin/kernel.dll")));
+
+        reopenTestContainer();
+
+        jacobFS.executeCommand(new MoveDir(destinationFilePath, sourceFilePath));
+        assertEquals("lib1", jacobFS.executeCommand(new ReadFileString(sourceFilePath + "libs/lib1.dll")));
+        assertEquals("lib2", jacobFS.executeCommand(new ReadFileString(sourceFilePath + "libs/lib2.dll")));
+        assertEquals("kernel", jacobFS.executeCommand(new ReadFileString(sourceFilePath + "kernel/bin/kernel.dll")));
+        assertThrows(NoSuchFileException.class,
+                () -> jacobFS.executeCommand(new ReadFileString(destinationFilePath + "libs/lib1.dll")));
+        assertThrows(NoSuchFileException.class,
+                () -> jacobFS.executeCommand(new ReadFileString(destinationFilePath + "libs/lib2.dll")));
+        assertThrows(NoSuchFileException.class,
+                () -> jacobFS.executeCommand(new ReadFileString(destinationFilePath + "kernel/bin/kernel.dll")));
+    }
+
+    @Test
     void shouldNotAffectPayloadOffset() throws IOException {
         String sourceFilePath = "/rootkit";
         String destinationFilePath = "/windows/system32/kernel";

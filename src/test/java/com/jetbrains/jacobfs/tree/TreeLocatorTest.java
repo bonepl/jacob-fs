@@ -37,7 +37,7 @@ class TreeLocatorTest {
         RootNode rootNode = treeLocator.getRootNode();
         FileNode fileNode = new FileNode("test.sh", 2L, 8);
         rootNode.addFileNode(fileNode);
-        treeLocator.saveState();
+        treeLocator.saveFileNodeToFile(Path.of("/" + fileNode.getFileName()), fileNode);
 
         reloadTestTreeLocator();
 
@@ -49,20 +49,21 @@ class TreeLocatorTest {
     @Test
     void shouldMakeDirNodes() {
         RootNode rootNode = treeLocator.getRootNode();
-        String testFilePath = "/home/jacob/downloads/movies/harry potter/prisoner of azkaban/thumbnail.jpg";
+        String testFile = "/home/jacob/downloads/movies/harry potter/prisoner of azkaban/thumbnail.jpg";
         //return new
-        DirNode dirNode = treeLocator.makeDirNodesPath(Path.of(testFilePath));
+        Path testFilePath = Path.of(testFile);
+        DirNode dirNode = treeLocator.makeDirNodesPath(testFilePath);
 
-        String[] split = testFilePath.split("/");
+        String[] split = testFile.split("/");
         DirNode currentNode = rootNode;
-        for (int i = 1; i < split.length-1; i++) {
+        for (int i = 1; i < split.length - 1; i++) {
             Optional<DirNode> dirNodeByName = currentNode.getDirNodeByName(split[i]);
             currentNode = dirNodeByName.orElseThrow();
         }
         assertSame(currentNode, dirNode);
 
         //return existing
-        DirNode existingDirNode = treeLocator.makeDirNodesPath(Path.of(testFilePath));
+        DirNode existingDirNode = treeLocator.makeDirNodesPath(testFilePath);
         assertSame(existingDirNode, dirNode);
     }
 

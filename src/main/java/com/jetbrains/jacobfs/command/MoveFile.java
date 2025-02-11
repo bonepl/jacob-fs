@@ -46,6 +46,6 @@ public class MoveFile implements VoidCommand {
         destinationDirNode.addFileNode(fileNode);
 
         treeLocator.removeEmptyDirNodesFromPath(source);
-        treeLocator.saveState();
+        treeLocator.saveFileNodeToFile(destination, fileNode);
     }
 }

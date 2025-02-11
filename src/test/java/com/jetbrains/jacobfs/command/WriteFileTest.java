@@ -25,9 +25,11 @@ class WriteFileTest extends AbstractJacobFSTest {
 
     @Test
     void shouldWriteStrings() throws IOException {
-        Map<String, String> testFiles = Map.of("/test/file.txt", "file",
+        Map<String, String> testFiles = Map.of(
+                "/test/file.txt", "file",
                 "/test/file2.txt", "file2",
-                "/file3.txt", "file3");
+                "/file3.txt", "file3"
+                );
 
         for (Map.Entry<String, String> entry : testFiles.entrySet()) {
             jacobFS.executeCommand(new WriteFile(entry.getKey(), entry.getValue()));

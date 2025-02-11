@@ -25,6 +25,6 @@ public class DeleteFile implements VoidCommand {
                 .orElseThrow(() -> new NoSuchFileException(path.toString()));
         dirNode.removeFileNodeByName(fileNode.getFileName());
         treeLocator.removeEmptyDirNodesFromPath(path);
-        treeLocator.saveState();
+        treeLocator.removeFileNodeFromFile(fileNode);
     }
 }

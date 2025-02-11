@@ -1,12 +1,13 @@
 package com.jetbrains.jacobfs.tree;
 
+import java.io.Serializable;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.NoSuchFileException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
-public class DirNode {
+public class DirNode implements Serializable {
     private String name;
     private List<DirNode> dirNodes;
     private List<FileNode> fileNodes;
