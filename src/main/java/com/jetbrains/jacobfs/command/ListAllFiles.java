@@ -19,14 +19,14 @@ public class ListAllFiles implements Command<List<String>> {
     private void collectFilesRecursively(DirNode dirNode, Path path, List<String> fileList) {
         Path newPath = path.resolve(dirNode.getName());
         if (dirNode.getFileNodes() != null) {
-            dirNode.getFileNodes().stream()
+            dirNode.getFileNodes().values().stream()
                     .map(fn -> newPath.resolve(fn.getFileName()))
                     .map(fnPath -> fnPath.toString().replaceAll("\\\\", "/"))
                     .forEach(fileList::add);
         }
 
         if (dirNode.getDirNodes() != null) {
-            dirNode.getDirNodes()
+            dirNode.getDirNodes().values()
                     .forEach(dn -> collectFilesRecursively(dn, newPath, fileList));
         }
     }

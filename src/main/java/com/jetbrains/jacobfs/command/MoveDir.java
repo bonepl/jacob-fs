@@ -52,12 +52,12 @@ public class MoveDir implements VoidCommand {
 
     public void updateFilesRecursively(Path destinationPath, DirNode dirNode, TreeLocator treeLocator) throws IOException {
         if (Objects.nonNull(dirNode.getFileNodes())) {
-            for (FileNode fn : dirNode.getFileNodes()) {
+            for (FileNode fn : dirNode.getFileNodes().values()) {
                 treeLocator.saveFileNodeToFile(destinationPath.resolve(fn.getFileName()), fn);
             }
         }
         if (Objects.nonNull(dirNode.getDirNodes())) {
-            for (DirNode dn : dirNode.getDirNodes()) {
+            for (DirNode dn : dirNode.getDirNodes().values()) {
                 Path newPath = destinationPath.resolve(dn.getName());
                 updateFilesRecursively(newPath, dn, treeLocator);
             }

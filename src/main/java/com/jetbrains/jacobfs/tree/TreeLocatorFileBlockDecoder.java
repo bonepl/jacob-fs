@@ -27,7 +27,6 @@ public final class TreeLocatorFileBlockDecoder {
                     byte[] pathBytes = new byte[pathLength];
                     byteBuffer.get(pathBytes, 0, pathLength);
                     Path path = Path.of(new String(pathBytes));
-//                byteBuffer.get(24, pathBytes, 0, pathLength);
                     FileNode fileNode = new FileNode(headerOffset, path.getFileName().toString(),
                             payloadOffset, payloadLength);
                     DirNode dirNode = rootNode.makeDirNodesPath(path);
