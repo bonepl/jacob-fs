@@ -54,4 +54,35 @@ class DeleteFileTest extends AbstractJacobFSTest {
         assertThrows(NoSuchFileException.class, () -> jacobFS.executeCommand(new ReadFileString(testFile1)));
         assertThrows(NoSuchFileException.class, () -> jacobFS.executeCommand(new ReadFileString(testFile2)));
     }
+
+    @Test
+    void shouldReuseOffsets() throws IOException {
+        String testFile1 = "/test/file.txt";
+        String testFile2 = "/file3.txt";
+        jacobFS.executeCommand(new WriteFile(testFile1, "file"));
+        assertEquals(128, jacobFS.executeCommand(getTreeLocatorLength()));
+
+        jacobFS.executeCommand(new DeleteFile(testFile1));
+        assertEquals(128, jacobFS.executeCommand(getTreeLocatorLength()));
+        jacobFS.executeCommand(new WriteFile(testFile2, "file"));
+        assertEquals(128, jacobFS.executeCommand(getTreeLocatorLength()));
+        jacobFS.executeCommand(new WriteFile(testFile1, "file"));
+        assertEquals(256, jacobFS.executeCommand(getTreeLocatorLength()));
+        jacobFS.executeCommand(new DeleteFile(testFile1));
+        assertEquals(256, jacobFS.executeCommand(getTreeLocatorLength()));
+
+        reopenTestContainer();
+        assertEquals(256, jacobFS.executeCommand(getTreeLocatorLength()));
+        jacobFS.executeCommand(new DeleteFile(testFile2));
+        assertEquals(256, jacobFS.executeCommand(getTreeLocatorLength()));
+        jacobFS.executeCommand(new WriteFile(testFile1, "file"));
+        jacobFS.executeCommand(new WriteFile(testFile2, "file"));
+        assertEquals(256, jacobFS.executeCommand(getTreeLocatorLength()));
+    }
+
+    private static Command<Integer> getTreeLocatorLength() {
+        return (tl) -> tl.getTreeLocatorMetadata().getTreeLocatorLength();
+    }
+
+
 }

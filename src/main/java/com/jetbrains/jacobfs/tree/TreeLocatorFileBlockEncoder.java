@@ -11,21 +11,20 @@ public class TreeLocatorFileBlockEncoder {
         if (treeLocatorMetadata.getTreeLocatorLength() + 128 > treeLocatorMetadata.getTreeLocatorReservedSpace()) {
             throw new RuntimeException("TreeLocator is too big to be saved! Last command has not been persisted");
         }
-        if (fileNode.getHeaderOffset() == 0L) {
-            fileNode.setHeaderOffset(treeLocatorMetadata.getTreeLocatorOffset() + treeLocatorMetadata.getTreeLocatorLength());
-        }
         byte[] fileBlock = fileNodeToFileBlock(path, fileNode);
         try (RandomAccessFile randomAccessFile = new RandomAccessFile(treeLocatorMetadata.getFile(), "rw")) {
-            randomAccessFile.seek(fileNode.getHeaderOffset());
+            randomAccessFile.seek(fileNode.getFileBlockOffset());
             randomAccessFile.write(fileBlock);
         }
-        treeLocatorMetadata.setTreeLocatorLength(treeLocatorMetadata.getTreeLocatorLength() + 128);
+        if (treeLocatorMetadata.getTreeLocatorOffset() + treeLocatorMetadata.getTreeLocatorLength() == fileNode.getFileBlockOffset()) {
+            treeLocatorMetadata.setTreeLocatorLength(treeLocatorMetadata.getTreeLocatorLength() + 128);
+        }
         treeLocatorMetadata.saveState();
     }
 
     public void removeFileNodeFromFile(FileNode fileNode, TreeLocatorMetadata treeLocatorMetadata) throws IOException {
         try (RandomAccessFile randomAccessFile = new RandomAccessFile(treeLocatorMetadata.getFile(), "rw")) {
-            randomAccessFile.seek(fileNode.getHeaderOffset());
+            randomAccessFile.seek(fileNode.getFileBlockOffset());
             randomAccessFile.writeByte(0);
         }
     }
@@ -40,7 +39,6 @@ public class TreeLocatorFileBlockEncoder {
         }
         ByteBuffer byteBuffer = ByteBuffer.allocate(128);
         byteBuffer.put((byte) 1);
-        byteBuffer.putLong(fileNode.getHeaderOffset());
         byteBuffer.putInt(path.toString().length());
         byteBuffer.putLong(fileNode.getPayloadOffset());
         byteBuffer.putInt(fileNode.getPayloadLength());

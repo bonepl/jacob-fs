@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
+import java.util.LinkedList;
+import java.util.Queue;
 
 public final class TreeLocatorFileBlockDecoder {
+    private final Queue<Long> reusableOffsets = new LinkedList<>();
 
     public RootNode loadTreeLocatorFromFile(TreeLocatorMetadata treeLocatorMetadata) throws IOException {
         if (treeLocatorMetadata.getTreeLocatorLength() % 128 != 0) {
@@ -20,21 +23,25 @@ public final class TreeLocatorFileBlockDecoder {
                 randomAccessFile.read(byteBuffer.array());
                 byte isActive = byteBuffer.get();
                 if (isActive == 1) {
-                    long headerOffset = byteBuffer.getLong();
                     int pathLength = byteBuffer.getInt();
                     long payloadOffset = byteBuffer.getLong();
                     int payloadLength = byteBuffer.getInt();
                     byte[] pathBytes = new byte[pathLength];
                     byteBuffer.get(pathBytes, 0, pathLength);
                     Path path = Path.of(new String(pathBytes));
-                    FileNode fileNode = new FileNode(headerOffset, path.getFileName().toString(),
+                    FileNode fileNode = new FileNode(i, path.getFileName().toString(),
                             payloadOffset, payloadLength);
                     DirNode dirNode = rootNode.makeDirNodesPath(path);
                     dirNode.addFileNode(fileNode);
+                } else {
+                    reusableOffsets.offer(i);
                 }
             }
         }
         return rootNode;
     }
 
+    public Queue<Long> getReusableOffsets() {
+        return reusableOffsets;
+    }
 }

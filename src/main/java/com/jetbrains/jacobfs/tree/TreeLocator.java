@@ -95,14 +95,26 @@ public class TreeLocator {
     }
 
     public void saveFileNodeToFile(Path path, FileNode fileNode) throws IOException {
+        if (fileNode.getFileBlockOffset() == 0L) {
+            if (treeLocatorDecoder.getReusableOffsets().isEmpty()) {
+                fileNode.setFileBlockOffset(treeLocatorMetadata.getTreeLocatorOffset() + treeLocatorMetadata.getTreeLocatorLength());
+            } else {
+                fileNode.setFileBlockOffset(treeLocatorDecoder.getReusableOffsets().poll());
+            }
+        }
         treeLocatorEncoder.saveFileNodeToFile(path, fileNode, treeLocatorMetadata);
     }
 
     public void removeFileNodeFromFile(FileNode fileNode) throws IOException {
+        treeLocatorDecoder.getReusableOffsets().offer(fileNode.getFileBlockOffset());
         treeLocatorEncoder.removeFileNodeFromFile(fileNode, treeLocatorMetadata);
     }
 
     public File getFile() {
         return treeLocatorMetadata.getFile();
+    }
+
+    public TreeLocatorMetadata getTreeLocatorMetadata() {
+        return treeLocatorMetadata;
     }
 }

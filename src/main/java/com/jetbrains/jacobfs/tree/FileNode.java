@@ -4,13 +4,13 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class FileNode implements Serializable {
-    private long headerOffset;
+    private long fileBlockOffset;
     private final long payloadOffset;
     private final int payloadLength;
     private String fileName;
 
-    public FileNode(long headerOffset, String fileName, long payloadOffset, int payloadLength) {
-        this.headerOffset = headerOffset;
+    public FileNode(long fileBlockOffset, String fileName, long payloadOffset, int payloadLength) {
+        this.fileBlockOffset = fileBlockOffset;
         this.fileName = fileName;
         this.payloadOffset = payloadOffset;
         this.payloadLength = payloadLength;
@@ -20,12 +20,12 @@ public class FileNode implements Serializable {
         this(0, fileName, payloadOffset, payloadLength);
     }
 
-    public long getHeaderOffset() {
-        return headerOffset;
+    public long getFileBlockOffset() {
+        return fileBlockOffset;
     }
 
-    public void setHeaderOffset(long headerOffset) {
-        this.headerOffset = headerOffset;
+    public void setFileBlockOffset(long fileBlockOffset) {
+        this.fileBlockOffset = fileBlockOffset;
     }
 
     public String getFileName() {
