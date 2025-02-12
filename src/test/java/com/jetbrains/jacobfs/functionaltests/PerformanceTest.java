@@ -1,17 +1,22 @@
 package com.jetbrains.jacobfs.functionaltests;
 
+import com.jetbrains.jacobfs.command.DeleteFile;
 import com.jetbrains.jacobfs.command.ListAllFiles;
 import com.jetbrains.jacobfs.command.WriteFile;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static org.junit.jupiter.api.Timeout.ThreadMode.SEPARATE_THREAD;
 
 @Disabled
 class PerformanceTest extends AbstractFunctionalTest {
@@ -19,11 +24,37 @@ class PerformanceTest extends AbstractFunctionalTest {
     RandomStringUtils insecure = RandomStringUtils.insecure();
 
     @Test
+    @Timeout(value = 20, unit = TimeUnit.SECONDS, threadMode = SEPARATE_THREAD)
+    void writeDelete() throws IOException {
+        int testFilesAmount = 8192;
+        ArrayList<WriteFile> writeFiles = new ArrayList<>(testFilesAmount);
+        ArrayList<DeleteFile> deleteFiles = new ArrayList<>(testFilesAmount);
+        byte[] bytes = new byte[128];
+
+        for (int i = 0; i < testFilesAmount; i++) {
+            String generated = "/" + insecure.nextAlphabetic(96) + ".sh";
+            writeFiles.add(new WriteFile(generated, bytes));
+            deleteFiles.add(new DeleteFile(generated));
+        }
+
+        while (true) {
+            for (WriteFile writeFile : writeFiles) {
+                jacobFS.executeCommand(writeFile);
+            }
+            System.out.println("writes loop done");
+            for (DeleteFile deleteFile : deleteFiles) {
+                jacobFS.executeCommand(deleteFile);
+            }
+            System.out.println("deletes loop done");
+        }
+    }
+
+    @Test
     void sameDirPerformanceTest() throws IOException {
         WriteFile.addFileTime = 0L;
         WriteFile.makeDirTimes = 0L;
         WriteFile.persistTreeTimes = 0L;
-        int testFilesAmount = 7000;
+        int testFilesAmount = 8192;
         byte[] bytes = new byte[1024];
         String sameDir = "/";
         System.out.println("path length = " + (sameDir.length() + 9));
@@ -75,7 +106,7 @@ class PerformanceTest extends AbstractFunctionalTest {
         byte[] bytes = new byte[1024];
         String pathLength = generatePath(10, 9);
         System.out.println("path length: " + pathLength.length());
-        int total = 7000;
+        int total = 8192;
         ArrayList<WriteFile> generated = new ArrayList<>(total);
         for (int i = 0; i < total; i++) {
             generated.add(new WriteFile(generatePath(10, 9), bytes));
